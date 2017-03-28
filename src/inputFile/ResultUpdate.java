@@ -2,12 +2,13 @@ package inputFile;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFRow;
+
 public class ResultUpdate {
-	public static String newPath=null;
-	public static String newFileName=null;
-	private static String reportPath=null;
-	private static String newSheetName="Details";
-	final static Logger Log=Logger.getLogger(ResultUpdate.class);
+	public static String newPath = null;
+	public static String newFileName = null;
+	private static String reportPath = null;
+	private static String newSheetName = "Details";
+	final static Logger Log = Logger.getLogger(ResultUpdate.class);
 	
 	public static void setPathForResultUpdate() throws Exception {
 		reportPath = "C:\\Users\\amarnath.rathore\\Desktop\\Automation\\workspace\\Demo\\inputFiles\\testData.xlsx";
@@ -20,14 +21,14 @@ public class ResultUpdate {
 		reportPath = newPath + newFileName;
 		try {
 			ExcelUtility.setExcelFile(reportPath, sheetName);
-			Log.info("Writing Test Details in " + sheetName);
+			Log.info("Test Details in " + sheetName);
 			int rowNo = 2, colNo = 6;
 			ExcelUtility.setStaticCellData(testStartDate, rowNo, colNo, reportPath);
-			rowNo=rowNo + 1;
+			rowNo = rowNo + 1;
 			ExcelUtility.setStaticCellData(timeZone, rowNo, colNo, reportPath);
-			rowNo=rowNo + 1;
+			rowNo = rowNo + 1;
 			ExcelUtility.setStaticCellData(browserInfo, rowNo, colNo, reportPath);
-			rowNo=rowNo + 1;
+			rowNo = rowNo + 1;
 			ExcelUtility.setStaticCellData(OSInfo, rowNo, colNo, reportPath);
 			Log.info("Sucess Updating Details for " + sheetName);
 		} catch (Exception e) {
@@ -68,7 +69,6 @@ public class ResultUpdate {
 			ExcelUtility.setStaticCellData(newResult, rowNo, colNo, reportPath);
 			colNo = colNo + 1;
 			ExcelUtility.setStaticCellData(comments, rowNo, colNo, reportPath);
-
 			if(!newPriority.equalsIgnoreCase("Pass")){
 				colNo = colNo + 1;
 				ExcelUtility.setStaticCellData(newPriority, rowNo, colNo, reportPath);

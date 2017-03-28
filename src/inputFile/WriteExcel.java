@@ -41,13 +41,13 @@ public class WriteExcel {
 				Cell cell = cellIterator.next();
 				switch(cell.getCellType()) {
 					case Cell.CELL_TYPE_BOOLEAN:
-						System.out.print(cell.getBooleanCellValue() + "\t\t");
+						System.out.print(cell.getBooleanCellValue() + "\t");
 						break;
 					case Cell.CELL_TYPE_NUMERIC:
-						System.out.print(cell.getNumericCellValue() + "\t\t");
+						System.out.print(cell.getNumericCellValue() + "\t");
 						break;
 					case Cell.CELL_TYPE_STRING:
-						System.out.print(cell.getStringCellValue() + "\t\t");
+						System.out.print(cell.getStringCellValue() + "\t");
 						break;
 				}
 			}

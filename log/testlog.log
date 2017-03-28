@@ -1,0 +1,4 @@
+2017-03-28 14:18:46,331- inputFile.ResultUpdate -INFO – Error updating results for Module Name
+2017-03-28 14:18:46,348- inputFile.ResultUpdate -ERROR – java.lang.NullPointerException
+2017-03-28 15:56:27,360- inputFile.ResultUpdate -INFO – Error updating results for Module Name
+2017-03-28 15:56:27,396- inputFile.ResultUpdate -ERROR – java.lang.NullPointerException
