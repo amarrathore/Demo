@@ -3,7 +3,6 @@ package inputFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -27,11 +26,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 /**
  * @author BCS Technology
  * 
  */
-public class SeleniumUtilitiesDemo {
+public class SeleniumUtilities {
 	public static File file;
 	public static FileInputStream inputStream;
 	public static XSSFWorkbook excelWorkBook;
@@ -42,12 +42,13 @@ public class SeleniumUtilitiesDemo {
 	public static FileOutputStream outputStream;
 	public static Connection connect;
 	public static Statement statement;
-	public static ResultSet result;
+	public static ResultSet resultSet;
+	private static String reportPath = null;
 	
-	public static File getFile(String path) {
+	public static File getFile(String fileLocation) {
 		try {
-			file = new File(path);
-		} catch (Exception e) {
+			file = new File(fileLocation);
+		} catch (Exception e) {		
 			e.printStackTrace();
 		}
 		return file;
@@ -62,31 +63,23 @@ public class SeleniumUtilitiesDemo {
 		return inputStream;
 	}
 
-    public static void setExcelFile(String path, String sheetName) throws Exception {
-		try {
-			SeleniumUtilitiesDemo.getFile(path);
-			SeleniumUtilitiesDemo.getInputSteam();
-			excelWorkBook = new XSSFWorkbook(inputStream);
-			excelWorkSheet = excelWorkBook.getSheet(sheetName);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public static void setExcelFile(String fileLocation, int excelSheetNumber) throws IOException {
+		SeleniumUtilities.getFile(fileLocation);
+		SeleniumUtilities.getInputSteam();
+		excelWorkBook = new XSSFWorkbook(inputStream);
+		excelWorkSheet = excelWorkBook.getSheetAt(excelSheetNumber);
 		Iterator<Row> iterator = excelWorkSheet.iterator();
 		while (iterator.hasNext()) {
 			Row currentRow = iterator.next();
 			Iterator<Cell> cellIterator = currentRow.iterator();
 			while (cellIterator.hasNext()) {
 				Cell cell = cellIterator.next();
-				Object value = getCellValue(cell);
+				Object value = cellToType(cell);
 				System.out.print("\t" + value);
 			}
 			System.out.println();
         }
 		inputStream.close();
-	}
-    
-    public static XSSFRow getRow(int rowNum) {
-		return excelWorkSheet.createRow(rowNum);
 	}
 	
 	public static int getRowCount() {
@@ -94,19 +87,23 @@ public class SeleniumUtilitiesDemo {
 		return rowCount;
 	}
 	
+	public static XSSFRow getRow(int rowNum) {
+		return excelWorkSheet.createRow(rowNum);
+	}
+	
 	public static int getColCount() {
 		int colCount = excelWorkSheet.getRow(getRowCount()).getLastCellNum();
 		return colCount;
 	}
     
-	public static Object getCellValue(Cell cell) throws Exception {
+	public static Object cellToType(Cell cell) {
     	switch (cell.getCellType()) {
     	case Cell.CELL_TYPE_NUMERIC:
 			if (DateUtil.isCellDateFormatted(cell)) {
-                return getExcelDateData(cell);
+                return getExcelDateValue(cell);
             } else {
             	return getExcelNumericData(cell);
-            }
+            }		
 		case Cell.CELL_TYPE_STRING:
 	        return getExcelStringData(cell);
 		case Cell.CELL_TYPE_BOOLEAN:
@@ -114,57 +111,14 @@ public class SeleniumUtilitiesDemo {
 	        default:
 	        return null;
 	    }
-	}
-	
-	public static String getCellData(int rowNum, int colNum) throws Exception {
-		try {
-			cell = excelWorkSheet.getRow(rowNum).getCell(colNum);
-			String cellData = cell.getStringCellValue();
-			return cellData;
-		} catch (Exception e) {
-			return "";
-		}
-	}
-	
-	public static void setCellData(String newResult, XSSFRow newRow, int colNum, String testFileData) throws Exception {
-		cell = newRow.createCell(colNum);
-		cell.setCellValue(newResult);
-		SeleniumUtilitiesDemo.writeData(testFileData);
-	}
-	
-	public static void setStaticCellData(String newResult, int rowNum, int colNum, String newTestFileData) throws Exception {
-		try {
-			row = excelWorkSheet.getRow(rowNum);
-			cell = row.getCell(colNum, org.apache.poi.ss.usermodel.Row.RETURN_BLANK_AS_NULL);
-			if (cell == null) {
-				cell = row.createCell(colNum);
-				cell.setCellValue(newResult);
-			} else {
-				cell.setCellValue(newResult);
-			}
-			outputStream = new FileOutputStream(newTestFileData);
-			excelWorkBook.write(outputStream);
-			XSSFFormulaEvaluator.evaluateAllFormulaCells(excelWorkBook);
-			outputStream.flush();
-			outputStream.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void writeData(String newTestFileData) throws Exception {
-		outputStream = new FileOutputStream(newTestFileData);
-		excelWorkBook.write(outputStream);
-		outputStream.flush();
-		outputStream.close();
-	}
+	}    
 	
 	public static double getExcelNumericData(Cell cell) {
 		double getExcelNumericData = cell.getNumericCellValue();
 		return getExcelNumericData;
 	}
 	
-	private static Date getExcelDateData(Cell cell) {
+	private static Date getExcelDateValue(Cell cell) {
 		Date getExcelDateData = cell.getDateCellValue();
 		return getExcelDateData;
 	}
@@ -178,13 +132,106 @@ public class SeleniumUtilitiesDemo {
 		boolean getExcelBooleanData = cell.getBooleanCellValue();
 		return getExcelBooleanData;
 	}
-	    
+	
+	public static void setExcel() throws IOException {
+		try {
+			reportPath = SeleniumUtilities.getProperties("excelReportLocation");		
+			SeleniumUtilities.getFile(reportPath);
+			SeleniumUtilities.getInputSteam();
+			excelWorkBook = new XSSFWorkbook(inputStream);
+			excelWorkSheet = excelWorkBook.getSheet("Details");	
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return;
+	}
+	
+	public static String getCellData(int rowNum, int colNum) throws Exception {
+		try {
+			cell = excelWorkSheet.getRow(rowNum).getCell(colNum);
+			String CellData = cell.getStringCellValue();
+			return CellData;
+		} catch (Exception e) {
+			return "";
+		}
+	}
+	
+	public static void setStaticCellData(String newResult, int rowNum, int colNum, String newFileTestData) throws Exception {
+		try {
+			row = excelWorkSheet.getRow(rowNum);
+			cell = row.getCell(colNum, org.apache.poi.ss.usermodel.Row.RETURN_BLANK_AS_NULL);
+			if (cell == null) {
+				cell = row.createCell(colNum);
+				cell.setCellValue(newResult);
+			} else {
+				cell.setCellValue(newResult);
+			}
+			outputStream = new FileOutputStream(newFileTestData);
+			excelWorkBook.write(outputStream);
+			XSSFFormulaEvaluator.evaluateAllFormulaCells(excelWorkBook);	
+			outputStream.flush();
+			outputStream.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void setCellData(String newResult, XSSFRow newRow, int colNum, String fileTestData) throws Exception {
+		XSSFCell Cell = newRow.createCell(colNum);
+		Cell.setCellValue(newResult);
+		SeleniumUtilities.writeData(fileTestData);
+	}
+	
+	public static void writeData(String newFileTestData) throws Exception {
+		outputStream = new FileOutputStream(newFileTestData);
+		excelWorkBook.write(outputStream);
+		outputStream.flush();
+		outputStream.close();
+	}
+	
+	public static void updateResult(String description, String moduleName, boolean boolResult, String attachment) {
+		String newResult, slNumber;
+		try {
+			SeleniumUtilities.setExcel();
+			int rowNo = SeleniumUtilities.getRowCount() + 1;
+			System.out.println("rowcount" + rowNo);
+			XSSFRow newRow = SeleniumUtilities.getRow(rowNo);
+			int newSlNumber = 0;
+			slNumber = SeleniumUtilities.getCellData(rowNo, 0);
+			if(slNumber.equalsIgnoreCase("Sl No")) {
+				newSlNumber = newSlNumber + 1;
+			} else {
+				newSlNumber = Integer.parseInt(slNumber);
+				newSlNumber = newSlNumber + 1;
+			}
+			slNumber = Integer.toString(newSlNumber);
+			int colNo = 0;
+			SeleniumUtilities.setCellData(slNumber, newRow, colNo, reportPath);
+			colNo = colNo + 1;
+			SeleniumUtilities.setStaticCellData(description, rowNo, colNo, reportPath);
+			colNo = colNo + 1;
+			SeleniumUtilities.setStaticCellData(moduleName, rowNo, colNo, reportPath);
+			if(boolResult == true) {
+				newResult = "Pass";
+			} else {
+				newResult = "FAIL";
+			}
+			colNo = colNo + 1;
+			SeleniumUtilities.setStaticCellData(newResult, rowNo, colNo, reportPath);
+			colNo = colNo + 1;
+			SeleniumUtilities.setStaticCellData(attachment, rowNo, colNo, reportPath);			
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+    
 	public static String getProperties(String locatorName) {	
 		try {
-			SeleniumUtilitiesDemo.getFile(System.getProperty("user.dir") + "/src/config.properties");
-			SeleniumUtilitiesDemo.getInputSteam();
+			SeleniumUtilities.getFile(System.getProperty("user.dir") + "/src/config.properties");
+			SeleniumUtilities.getInputSteam();
 			property = new Properties();
-			property.load(inputStream);
+			property.load(inputStream);		
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -192,7 +239,7 @@ public class SeleniumUtilitiesDemo {
 	}
 	
 	public static void captureScreenshot(ITestResult result, WebDriver driver) throws WebDriverException, Exception {
-		String location = SeleniumUtilitiesDemo.getProperties("screenshotLocation");
+		String location = SeleniumUtilities.getProperties("screenshotLocation");
     	String methodName = result.getName().toString().trim();
     	String timeStamp = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss").format(new Date()) + "_";
 		File sourceFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
@@ -221,12 +268,13 @@ public class SeleniumUtilitiesDemo {
 	
 	public static List<String> getSQLQuery(String query) throws Exception {
 		statement = connect.createStatement();
-		result = statement.executeQuery(query);
+		resultSet = statement.executeQuery(query);
 		List<String> values = new ArrayList<String>();
-		while(result.next()) {
-			values.add(result.getString(1).toString().trim());
-			System.out.println(result.getString(1));
+		while(resultSet.next()) {
+			values.add(resultSet.getString(1).toString().trim());
+			System.out.println(resultSet.getString(1));
 		}
 		return values;
 	}
+
 } 

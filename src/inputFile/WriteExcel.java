@@ -56,6 +56,7 @@ public class WriteExcel {
 		inputStream.close();
 		outputStream = new FileOutputStream(fileLocation + "test.xlsx");
 		excelWorkBook.write(outputStream);
+		outputStream.flush();
 		outputStream.close();
 		}
 	
