@@ -1,79 +1,100 @@
 package inputFile;
 
-import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 
+//import utility.preConfiguration;
+
 public class ResultUpdate {
-	public static String newPath = null;
-	public static String newFileName = null;
-	private static String reportPath = null;
-	private static String newSheetName = "Details";
-	final static Logger Log = Logger.getLogger(ResultUpdate.class);
-	
+	public static String sPath=null;
+	public static String sFileName=null;
+	private static String sReportPath=null;
+	private static String sSheetName="Details";
+
 	public static void setPathForResultUpdate() throws Exception {
-		reportPath = SeleniumUtilitiesDemo.getProperties("excelFileLocation");
-		SeleniumUtilitiesDemo.setExcelFile(reportPath, newSheetName);
-		Log.info("Excel path set at " + reportPath);
-		return;
-	}
-	
-	public static void setPathForResultUpdate(String sheetName, String testStartDate, String timeZone, String browserInfo) {
-		reportPath = newPath + newFileName;
-		try {
-			SeleniumUtilitiesDemo.setExcelFile(reportPath, sheetName);
-			Log.info("Test Details in " + sheetName);
-			int rowNo = 2, colNo = 6;
-			SeleniumUtilitiesDemo.setStaticCellData(testStartDate, rowNo, colNo, reportPath);
-			rowNo = rowNo + 1;
-			SeleniumUtilitiesDemo.setStaticCellData(timeZone, rowNo, colNo, reportPath);
-			rowNo = rowNo + 1;
-			SeleniumUtilitiesDemo.setStaticCellData(browserInfo, rowNo, colNo, reportPath);		
-		} catch (Exception e) {
-			Log.error("Error Updating Details for " + sheetName + e.toString().substring(0,10));
-		}
+		sReportPath=sPath+sFileName;
+
+		ExcelUtility.setExcelFile(sReportPath, sSheetName);
 		return;
 	}
 
-	public static void updateResult(String URL, String section, boolean result, String comments, int priority) {
-		String newResult, number, newPriority = null;
+	public static void setPathForResultUpdate(String SheetName, String sTestStartDate, String sTimeZone, String sBrowserInfo, String sOSInfo) {
+		sReportPath=sPath+sFileName;
 		try {
-			int rowNo = SeleniumUtilitiesDemo.getRowCount() + 1;
-			XSSFRow newRow = SeleniumUtilitiesDemo.getRow(rowNo);
-			int newNumber = 0;
-			number = SeleniumUtilitiesDemo.getCellData(rowNo - 1, 0);
-			if(number.equalsIgnoreCase("Sl No")) {
-				newNumber = newNumber + 1;
-			} else {
-				newNumber = Integer.parseInt(number);
-				newNumber = newNumber + 1;
+			ExcelUtility.setExcelFile(sReportPath, SheetName);
+			int iRowNo=2, iColNo=6;
+			ExcelUtility.setStaticCellData(sTestStartDate, iRowNo, iColNo, sReportPath);
+
+			iRowNo=iRowNo+1;
+			ExcelUtility.setStaticCellData(sTimeZone, iRowNo, iColNo, sReportPath);
+
+			iRowNo=iRowNo+1;
+			ExcelUtility.setStaticCellData(sBrowserInfo, iRowNo, iColNo, sReportPath);
+
+			iRowNo=iRowNo+1;
+			ExcelUtility.setStaticCellData(sOSInfo, iRowNo, iColNo, sReportPath);			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+
+		return;
+
+	}// End of setPathForResultUpdate
+
+
+
+	public static void updateResult(String sURL, String sSection, boolean bResult, String sComments, int iPriority) {
+		String sResult,slNumber,sPriority = null;
+		try {
+
+			int iRowNo = ExcelUtility.getRowCount()+1;
+
+			XSSFRow newRow = ExcelUtility.getRow(iRowNo);
+
+			int iSlNumber=0;
+			slNumber=ExcelUtility.getCellData(iRowNo-1, 0);
+
+			if(slNumber.equalsIgnoreCase("Sl No")){
+				iSlNumber=iSlNumber+1;
 			}
-			number = Integer.toString(newNumber);
-			int colNo = 0;
-			SeleniumUtilitiesDemo.setCellData(number, newRow, colNo, reportPath);
-			colNo = colNo + 1;
-			SeleniumUtilitiesDemo.setStaticCellData(URL, rowNo, colNo, reportPath);
-			colNo = colNo + 1;
-			SeleniumUtilitiesDemo.setStaticCellData(section, rowNo, colNo, reportPath);
-			if(result == true) {
-				newResult = "Pass";
-				newPriority = "Pass";
-			} else {
-				newResult="FAIL";
-				//newPriority = config.Priority.get(priority).toString();
-				Log.info(newResult + " with " + newPriority + " for " + section);
+			else {
+				iSlNumber=Integer.parseInt(slNumber);
+				iSlNumber=iSlNumber+1;
 			}
-			colNo = colNo + 1;
-			SeleniumUtilitiesDemo.setStaticCellData(newResult, rowNo, colNo, reportPath);
-			colNo = colNo + 1;
-			SeleniumUtilitiesDemo.setStaticCellData(comments, rowNo, colNo, reportPath);
-			if(!newPriority.equalsIgnoreCase("Pass")) {
-				colNo = colNo + 1;
-				SeleniumUtilitiesDemo.setStaticCellData(newPriority, rowNo, colNo, reportPath);
+			slNumber=Integer.toString(iSlNumber);
+
+
+			int iColNo=0;
+
+			ExcelUtility.setCellData(slNumber, newRow,iColNo, sReportPath);
+
+			iColNo=iColNo+1;
+			ExcelUtility.setStaticCellData(sURL, iRowNo, iColNo, sReportPath);
+
+			iColNo=iColNo+1;
+			ExcelUtility.setStaticCellData(sSection, iRowNo, iColNo, sReportPath);
+
+			if(bResult==true){
+				sResult="Pass";
+				sPriority="Pass";
 			}
-			Log.info("Success updating results for " + section);
-		} catch ( Exception e) {
-			Log.info("Error updating results for " + section);
-			Log.error(e.toString());
+			else {
+				sResult="FAIL";
+			}
+
+			iColNo=iColNo+1;
+			ExcelUtility.setStaticCellData(sResult, iRowNo, iColNo, sReportPath);
+
+			iColNo=iColNo+1;
+			ExcelUtility.setStaticCellData(sComments, iRowNo, iColNo, sReportPath);
+
+			if(!sPriority.equalsIgnoreCase("Pass")){
+				iColNo=iColNo+1;
+				ExcelUtility.setStaticCellData(sPriority, iRowNo, iColNo, sReportPath);
+			}
+		}
+		catch ( Exception e){
+			e.printStackTrace();
 		}
 	}
 }

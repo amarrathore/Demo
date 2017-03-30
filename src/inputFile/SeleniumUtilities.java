@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 /**
  * @author BCS Technology
  * 
@@ -43,7 +42,7 @@ public class SeleniumUtilities {
 	public static Connection connect;
 	public static Statement statement;
 	public static ResultSet resultSet;
-	private static String reportPath = null;
+
 	
 	public static File getFile(String fileLocation) {
 		try {
@@ -82,20 +81,6 @@ public class SeleniumUtilities {
 		inputStream.close();
 	}
 	
-	public static int getRowCount() {
-		int rowCount = excelWorkSheet.getLastRowNum()-1;
-		return rowCount;
-	}
-	
-	public static XSSFRow getRow(int rowNum) {
-		return excelWorkSheet.createRow(rowNum);
-	}
-	
-	public static int getColCount() {
-		int colCount = excelWorkSheet.getRow(getRowCount()).getLastCellNum();
-		return colCount;
-	}
-    
 	public static Object cellToType(Cell cell) {
     	switch (cell.getCellType()) {
     	case Cell.CELL_TYPE_NUMERIC:
@@ -133,97 +118,15 @@ public class SeleniumUtilities {
 		return getExcelBooleanData;
 	}
 	
-	public static void setExcel() throws IOException {
-		try {
-			reportPath = SeleniumUtilities.getProperties("excelReportLocation");		
-			SeleniumUtilities.getFile(reportPath);
-			SeleniumUtilities.getInputSteam();
-			excelWorkBook = new XSSFWorkbook(inputStream);
-			excelWorkSheet = excelWorkBook.getSheet("Details");	
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		return;
+	
+	public static int getRowCount() {
+		int rowCount = excelWorkSheet.getLastRowNum()-1;
+		return rowCount;
 	}
 	
-	public static String getCellData(int rowNum, int colNum) throws Exception {
-		try {
-			cell = excelWorkSheet.getRow(rowNum).getCell(colNum);
-			String CellData = cell.getStringCellValue();
-			return CellData;
-		} catch (Exception e) {
-			return "";
-		}
-	}
-	
-	public static void setStaticCellData(String newResult, int rowNum, int colNum, String newFileTestData) throws Exception {
-		try {
-			row = excelWorkSheet.getRow(rowNum);
-			cell = row.getCell(colNum, org.apache.poi.ss.usermodel.Row.RETURN_BLANK_AS_NULL);
-			if (cell == null) {
-				cell = row.createCell(colNum);
-				cell.setCellValue(newResult);
-			} else {
-				cell.setCellValue(newResult);
-			}
-			outputStream = new FileOutputStream(newFileTestData);
-			excelWorkBook.write(outputStream);
-			XSSFFormulaEvaluator.evaluateAllFormulaCells(excelWorkBook);	
-			outputStream.flush();
-			outputStream.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void setCellData(String newResult, XSSFRow newRow, int colNum, String fileTestData) throws Exception {
-		XSSFCell Cell = newRow.createCell(colNum);
-		Cell.setCellValue(newResult);
-		SeleniumUtilities.writeData(fileTestData);
-	}
-	
-	public static void writeData(String newFileTestData) throws Exception {
-		outputStream = new FileOutputStream(newFileTestData);
-		excelWorkBook.write(outputStream);
-		outputStream.flush();
-		outputStream.close();
-	}
-	
-	public static void updateResult(String description, String moduleName, boolean boolResult, String attachment) {
-		String newResult, slNumber;
-		try {
-			SeleniumUtilities.setExcel();
-			int rowNo = SeleniumUtilities.getRowCount() + 1;
-			System.out.println("rowcount" + rowNo);
-			XSSFRow newRow = SeleniumUtilities.getRow(rowNo);
-			int newSlNumber = 0;
-			slNumber = SeleniumUtilities.getCellData(rowNo, 0);
-			if(slNumber.equalsIgnoreCase("Sl No")) {
-				newSlNumber = newSlNumber + 1;
-			} else {
-				newSlNumber = Integer.parseInt(slNumber);
-				newSlNumber = newSlNumber + 1;
-			}
-			slNumber = Integer.toString(newSlNumber);
-			int colNo = 0;
-			SeleniumUtilities.setCellData(slNumber, newRow, colNo, reportPath);
-			colNo = colNo + 1;
-			SeleniumUtilities.setStaticCellData(description, rowNo, colNo, reportPath);
-			colNo = colNo + 1;
-			SeleniumUtilities.setStaticCellData(moduleName, rowNo, colNo, reportPath);
-			if(boolResult == true) {
-				newResult = "Pass";
-			} else {
-				newResult = "FAIL";
-			}
-			colNo = colNo + 1;
-			SeleniumUtilities.setStaticCellData(newResult, rowNo, colNo, reportPath);
-			colNo = colNo + 1;
-			SeleniumUtilities.setStaticCellData(attachment, rowNo, colNo, reportPath);			
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+	public static int getColCount() {
+		int colCount = excelWorkSheet.getRow(getRowCount()).getLastCellNum();
+		return colCount;
 	}
     
 	public static String getProperties(String locatorName) {	
