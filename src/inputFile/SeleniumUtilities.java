@@ -42,7 +42,7 @@ public class SeleniumUtilities {
 	public static Connection connect;
 	public static Statement statement;
 	public static ResultSet resultSet;
-
+	private static String reportPath = null;
 	
 	public static File getFile(String fileLocation) {
 		try {
@@ -81,6 +81,20 @@ public class SeleniumUtilities {
 		inputStream.close();
 	}
 	
+	public static int getRowCount() {
+		int rowCount = excelWorkSheet.getLastRowNum();
+		return rowCount;
+	}
+	
+	public static XSSFRow getRow(int rowNum) {
+		return excelWorkSheet.createRow(rowNum);
+	}
+	
+	public static int getColCount() {
+		int colCount = excelWorkSheet.getRow(getRowCount()).getLastCellNum();
+		return colCount;
+	}
+    
 	public static Object cellToType(Cell cell) {
     	switch (cell.getCellType()) {
     	case Cell.CELL_TYPE_NUMERIC:
@@ -118,15 +132,93 @@ public class SeleniumUtilities {
 		return getExcelBooleanData;
 	}
 	
-	
-	public static int getRowCount() {
-		int rowCount = excelWorkSheet.getLastRowNum()-1;
-		return rowCount;
+	public static void setExcel() throws IOException {
+		try {
+			reportPath = SeleniumUtilities.getProperties("excelReportLocation");		
+			SeleniumUtilities.getFile(reportPath);
+			SeleniumUtilities.getInputSteam();
+			excelWorkBook = new XSSFWorkbook(inputStream);
+			excelWorkSheet = excelWorkBook.getSheetAt(0);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return;
 	}
 	
-	public static int getColCount() {
-		int colCount = excelWorkSheet.getRow(getRowCount()).getLastCellNum();
-		return colCount;
+	public static String getCellData(int rowNum, int colNum) throws Exception {
+		try {
+			cell = excelWorkSheet.getRow(rowNum).getCell(colNum);
+			String CellData = cell.getStringCellValue();
+			return CellData;
+		} catch (Exception e) {
+			return "";
+		}
+	}
+	
+	public static void setStaticCellData(String newResult, int rowNum, int colNum, String newFileTestData) throws Exception {
+		try {
+			row = excelWorkSheet.getRow(rowNum);
+			cell = row.getCell(colNum, org.apache.poi.ss.usermodel.Row.RETURN_BLANK_AS_NULL);
+			if (cell == null) {
+				cell = row.createCell(colNum);
+				cell.setCellValue(newResult);
+			} else {
+				cell.setCellValue(newResult);
+			}
+			SeleniumUtilities.writeData(newFileTestData);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void setCellData(String newResult, XSSFRow newRow, int colNum) throws Exception {
+		XSSFCell Cell = newRow.createCell(colNum);
+		Cell.setCellValue(newResult);		
+	}
+	
+	public static void writeData(String newFileTestData) throws Exception {
+		outputStream = new FileOutputStream(newFileTestData);
+		excelWorkBook.write(outputStream);
+		outputStream.flush();
+		outputStream.close();
+	}
+	
+	public static void updateResult(String description, String moduleName, boolean boolResult, String attachment) {
+		String newResult, slNumber;
+		try {
+			SeleniumUtilities.setExcel();
+			int rowNo = SeleniumUtilities.getRowCount()+1;
+			System.out.println("rowcount" + rowNo);
+			XSSFRow newRow = SeleniumUtilities.getRow(rowNo);
+			int newSlNumber = 0;
+			slNumber = SeleniumUtilities.getCellData(rowNo-1, 0);
+			if(slNumber.equalsIgnoreCase("Sl No")) {
+				newSlNumber = newSlNumber + 1;
+			} else {
+				newSlNumber = Integer.parseInt(slNumber);
+				newSlNumber = newSlNumber + 1;
+			}
+			slNumber = Integer.toString(newSlNumber);
+			int colNo = 0;
+			SeleniumUtilities.setCellData(slNumber, newRow, colNo);
+			colNo = colNo + 1;
+			SeleniumUtilities.setCellData(description, newRow, colNo);			
+			colNo = colNo + 1;
+			SeleniumUtilities.setCellData(moduleName, newRow, colNo);
+			if(boolResult == true) {
+				newResult = "Pass";
+			} else {
+				newResult = "FAIL";
+			}
+			colNo = colNo + 1;
+			SeleniumUtilities.setCellData(newResult, newRow, colNo);
+			colNo = colNo + 1;
+			SeleniumUtilities.setCellData(attachment, newRow, colNo);
+			SeleniumUtilities.writeData(reportPath);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
     
 	public static String getProperties(String locatorName) {	
@@ -179,5 +271,4 @@ public class SeleniumUtilities {
 		}
 		return values;
 	}
-
 } 
