@@ -2,9 +2,11 @@ package inputFile;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
+import org.apache.log4j.spi.LoggerFactory;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -13,6 +15,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
+
 
 /**
  * Util class consists wait for page load,page load with user defined max time and is used globally in all classes and methods
@@ -83,7 +86,7 @@ public class Utils extends WebDriverFactory {
 	
 	public static boolean waitForElement(WebDriver driver, WebElement element, int maxWait) {
 		boolean statusOfElementToBeReturned = false;
-		long startTime = StopWatch.startTime();
+		//long startTime = StopWatch.startTime();
 		WebDriverWait wait = new WebDriverWait(driver, maxWait);
 		try {
 			if (element.isDisplayed() && element.isEnabled()) {

@@ -12,7 +12,7 @@ public class BrowserActions extends WebDriverFactory {
 	
 	public static void typeOnTextField(WebElement text, String textToType, WebDriver driver, String elementDescription) {
 		if (!Utils.waitForElement(driver, text, 1))
-			throw new SkipException(elementDescription + " field not found in pag");
+			throw new SkipException(elementDescription + " field not found in page");
 		try {
 			text.clear();
 			text.click();

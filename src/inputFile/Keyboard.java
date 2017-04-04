@@ -74,6 +74,7 @@ import java.awt.event.KeyEvent;
  */
 public class Keyboard {
 	public Robot robot;
+	
 	public Keyboard() throws AWTException {
 		this.robot = new Robot();
 	}
