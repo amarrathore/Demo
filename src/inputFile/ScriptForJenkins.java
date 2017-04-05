@@ -28,8 +28,7 @@ public class ScriptForJenkins {
 			   String childWindow = iterator.next();
 			   if(!parent.equals(childWindow)) {
 				   driver.switchTo().window(childWindow);
-			   }
-				   
+			   }				   
 			driver.findElement(By.xpath("//*[@id='input_origin']")).click();
 			driver.findElement(By.xpath("//*[@id='btn_origen']")).click();
 			driver.findElement(By.linkText("Acapulco")).click();
