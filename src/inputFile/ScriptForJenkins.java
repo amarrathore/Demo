@@ -37,8 +37,7 @@ public class ScriptForJenkins {
 			driver.findElement(By.xpath("//*[@id='btn_origen']")).click();
 			//driver.findElement(By.linkText("Mexico City")).click();
 			driver.findElement(By.xpath("//*[@id='MX']/div/ul[1]/li[1]/a")).click();
-			
-			
+						
   }
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
