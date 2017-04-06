@@ -6,6 +6,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
+import org.testng.annotations.Test;
 
 public class MultiWindow {
 
@@ -21,20 +22,21 @@ driver.manage().window().maximize();
 driver.get("http://www.naukri.com/");
 
 // It will return the parent window name as a String
-String parent=driver.getWindowHandle();
-Set<String>s1=driver.getWindowHandles();
-Iterator<String> I1= s1.iterator();
-while(I1.hasNext()) {
-   String child_window=I1.next();
-   if(!parent.equals(child_window)) {
-driver.switchTo().window(child_window);
-
-System.out.println(driver.switchTo().window(child_window).getTitle());
+driver.findElement(By.name("opc")).click();
+String parent = driver.getWindowHandle();		
+Set<String> set = driver.getWindowHandles();
+Iterator<String> iterator = set.iterator();
+while(iterator.hasNext()) {
+   String childWindow = iterator.next();
+   if(!parent.equals(childWindow)) {
+	   driver.switchTo().window(childWindow);
+   }
+System.out.println(driver.switchTo().window(childWindow).getTitle());
+}
 
 driver.close();
 }
 
-}
 // once all pop up closed now switch to parent window
 driver.switchTo().window(parent);
 
